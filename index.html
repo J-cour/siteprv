@@ -443,6 +443,7 @@
 
 <!-- Firebase SDK (v9 compat mode) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script>
@@ -457,6 +458,7 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 const db = firebase.firestore();
 const elevesCol = db.collection('eleves');
 
@@ -849,7 +851,14 @@ function showNotif(msg, isError = false) {
 const today = new Date().toISOString().split('T')[0];
 document.getElementById('seance-date') && (document.getElementById('seance-date').value = today);
 
-startRealtimeSync();
+// Auth anonyme → puis sync Firestore
+setFbStatus('connecting', 'Connexion…');
+auth.signInAnonymously()
+  .then(() => startRealtimeSync())
+  .catch(err => {
+    setFbStatus('error', '⚠️ Auth échouée');
+    showNotif('Erreur auth : ' + err.message, true);
+  });
 </script>
 </body>
 </html>
